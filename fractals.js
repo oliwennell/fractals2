@@ -1,27 +1,41 @@
-const RecursionLevel = 10;
+let recursionsChosen = 0;
 let canvas;
 
 $(document).ready(function () {
-    canvas = document.getElementById('fractal-canvas');
-    const context = canvas.getContext("2d");
+    const elementId = "fractal-canvas";
+    
+    $(`#${elementId}`)
+        .click(e => {
+            recursionsChosen++;
+            if (recursionsChosen > 7)
+                recursionsChosen = 1;
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
+            draw(canvas);
+        });
 
-    drawSierpińskiTriangle(context);
+    canvas = document.getElementById(elementId);
+    draw(canvas);
 });
 
-function drawSierpińskiTriangle(context){
+function draw(canvas) {
+    const context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawSierpińskiTriangle(context, recursionsChosen);
+}
+
+function drawSierpińskiTriangle(context, recursions){
     const outermostTriangle = [
         { x: -0.5, y: 0.5 },
         { x: 0, y: -0.5 },
         { x: 0.5, y: 0.5 }
     ];
-    drawInnerSierpińskiTriangle(outermostTriangle, 0, context);
+    drawInnerSierpińskiTriangle(outermostTriangle, recursions, context);
 }
 
-function drawInnerSierpińskiTriangle(trianglePoints, level, context) {
+function drawInnerSierpińskiTriangle(trianglePoints, recursionsRemaining, context) {
     
-    if (level >= RecursionLevel)
+    if (recursionsRemaining < 0)
         return;
 
     drawTriangle(trianglePoints, context);
@@ -32,9 +46,10 @@ function drawInnerSierpińskiTriangle(trianglePoints, level, context) {
         midPoint(trianglePoints[2], trianglePoints[0])
     ];
 
-    drawInnerSierpińskiTriangle([ midPoints[0], trianglePoints[1], midPoints[1] ], level+1, context);
-    drawInnerSierpińskiTriangle([ midPoints[2], midPoints[1], trianglePoints[2] ], level+1, context);
-    drawInnerSierpińskiTriangle([ trianglePoints[0], midPoints[0], midPoints[2] ], level+1, context);
+    const nextRecursionsRemaining = recursionsRemaining - 1;
+    drawInnerSierpińskiTriangle([ midPoints[0], trianglePoints[1], midPoints[1] ], nextRecursionsRemaining, context);
+    drawInnerSierpińskiTriangle([ midPoints[2], midPoints[1], trianglePoints[2] ], nextRecursionsRemaining, context);
+    drawInnerSierpińskiTriangle([ trianglePoints[0], midPoints[0], midPoints[2] ], nextRecursionsRemaining, context);
 }
 
 function midPoint(a, b) {
